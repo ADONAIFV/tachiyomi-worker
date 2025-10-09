@@ -39,7 +39,7 @@ export async function onRequest(context) {
       cf: {
         image: {
           width: 600,
-          quality: 75,
+          quality: 5,
           format: 'webp'
         }
       }
