@@ -1,113 +1,58 @@
-// ============================================================================
-// INICIO DEL CÓDIGO DE VIPS.JS (EL "ARRANCADOR") - NO MODIFICAR ESTA PARTE
-// ============================================================================
-var vips;vips=function(){var _scriptDir=import.meta.url;return function(vips_module){vips_module=vips_module||{};var VipsObject_VipsObject;var VipsOperation_VipsOperation;var vips_callback_fn;var vips_callback_block_fn;var VipsImage_VipsImage;const get_vips_error=()=>{const err=vips_module.ccall("vips_error_buffer","string",[],[]);vips_module.ccall("vips_error_clear",null,[],[]);return err};const get_properties=vips_image=>{const properties=new Set;const names_ptr=vips_module.ccall("vips_image_get_fields","number",["number"],[vips_image]);for(let i=0;names_ptr;i++){const name_ptr=vips_module.getValue(names_ptr+i*4,"i32");if(name_ptr==0){break}properties.add(vips_module.UTF8ToString(name_ptr))}return properties};class VipsObject{constructor(ptr){VipsObject_VipsObject=VipsObject_VipsObject||vips_module.emnapi_define_class("VipsObject",{finalize:function(self_ptr){vips_module.ccall("g_object_unref",null,["number"],[self_ptr])}},undefined,[]);this.self=VipsObject_VipsObject.new(this)}}class VipsOperation extends VipsObject{constructor(ptr){super(ptr);VipsOperation_VipsOperation=VipsOperation_VipsOperation||vips_module.emnapi_define_class("VipsOperation",{},VipsObject.prototype,[])}get(name){const gvalue=new vips_module.GValue;gvalue.init(0);const name_ptr=vips_module.stringToNewUTF8(name);const ret=vips_module.ccall("vips_object_get_property","number",["number","number","number"],[this.self,name_ptr,gvalue.self]);vips_module._free(name_ptr);if(ret!=0)throw new Error(get_vips_error());return gvalue.get()}set(name,value){const gvalue=new vips_module.GValue;gvalue.init(0);gvalue.set(value);const name_ptr=vips_module.stringToNewUTF8(name);const ret=vips_module.ccall("vips_object_set_property","number",["number","number","number"],[this.self,name_ptr,gvalue.self]);vips_module._free(name_ptr);if(ret!=0)throw new Error(get_vips_error())}call(operation_name,...args){const op=VipsOperation.newFromName(operation_name);let i=0;for(const arg of args)op.set(op.getNthOptionalInput(i++),arg);return op.call()}call(options={}){for(let name in options)this.set(name,options[name]);const new_image=vips_module.ccall("vips_cache_operation_build","number",["number"],[this.self]);if(new_image==0)throw new Error(get_vips_error());const result=new VipsImage(new_image);const required_outputs=this.getNRequiredOutputs();if(required_outputs>1){const results=[result];for(let i=1;i<required_outputs;i++)results.push(this.get(this.getNthOptionalOutput(i)));return results}return result}static newFromName(name){const name_ptr=vips_module.stringToNewUTF8(name);const op=vips_module.ccall("vips_operation_new","number",["number"],[name_ptr]);if(op==0)throw new Error(get_vips_error());vips_module._free(name_ptr);return new VipsOperation(op)}}class VipsImage extends VipsObject{constructor(ptr){super(ptr);VipsImage_VipsImage=VipsImage_VipsImage||vips_module.emnapi_define_class("VipsImage",{},VipsObject.prototype,[])}static newFromBuffer(buffer,options_str=""){const ptr=vips_module.ccall("vips_image_new_from_buffer","number",["array","number","string"],[buffer,buffer.length,options_str]);if(ptr==0)throw new Error(get_vips_error());return new VipsImage(ptr)}writeToBuffer(suffix,options={}){const suffix_ptr=vips_module.stringToNewUTF8(suffix);const buf_ptr_ptr=vips_module._malloc(4);const size_ptr=vips_module._malloc(4);const result=vips_module.ccall("vips_image_write_to_buffer","number",["number","number","number","number"],[this.self,suffix_ptr,buf_ptr_ptr,size_ptr]);vips_module._free(suffix_ptr);if(result!=0)throw new Error(get_vips_error());const buf_ptr=vips_module.getValue(buf_ptr_ptr,"i32");const size=vips_module.getValue(size_ptr,"i32");vips_module._free(buf_ptr_ptr);vips_module._free(size_ptr);const data=vips_module.HEAPU8.subarray(buf_ptr,buf_ptr+size);vips_module.ccall("g_free",null,["number"],[buf_ptr]);return data}get(name){const gvalue=new vips_module.GValue;gvalue.init(0);const name_ptr=vips_module.stringToNewUTF8(name);const ret=vips_module.ccall("vips_image_get","number",["number","number","number"],[this.self,name_ptr,gvalue.self]);vips_module._free(name_ptr);if(ret!=0)throw new Error(get_vips_error());return gvalue.get()}set(type,name,value){const gvalue=new vips_module.GValue;gvalue.init(type);gvalue.set(value);const name_ptr=vips_module.stringToNewUTF8(name);vips_module.ccall("vips_image_set",null,["number","number","number"],[this.self,name_ptr,gvalue.self]);vips_module._free(name_ptr)}remove(name){const name_ptr=vips_module.stringToNewUTF8(name);const result=vips_module.ccall("vips_image_remove","number",["number","number"],[this.self,name_ptr]);vips_module._free(name_ptr);return result}avg(){const result_ptr=vips_module._malloc(8);const ret=vips_module.ccall("vips_avg","number",["number","number"],[this.self,result_ptr]);if(ret!==0){vips_module._free(result_ptr);throw new Error(get_vips_error())}const result=vips_module.getValue(result_ptr,"double");vips_module._free(result_ptr);return result}}for(const name of["width","height","bands","format","interpretation","xres","yres","xoffset","yoffset","orientation"]){Object.defineProperty(VipsImage.prototype,name,{get:function(){return this.get(name)}})}async function init(module_path){vips_module=await vips_module.default(module_path);vips_module.GValue=class GValue{constructor(){const gvalue_size=vips_module.ccall("vips_g_value_sizeof","number",[],[]);this.self=vips_module._malloc(gvalue_size)}init(type){vips_module.ccall("vips_g_value_init",null,["number","number"],[this.self,type])}get(){const type=this.getType();const g_type_fundamental=vips_module.ccall("g_type_fundamental","number",["number"],[type]);switch(vips_module.GType[g_type_fundamental]){case"G_TYPE_BOOLEAN":return vips_module.ccall("g_value_get_boolean","boolean",["number"],[this.self]);case"G_TYPE_INT":return vips_module.ccall("g_value_get_int","number",["number"],[this.self]);case"G_TYPE_DOUBLE":return vips_module.ccall("g_value_get_double","number",["number"],[this.self]);case"G_TYPE_STRING":const str_ptr=vips_module.ccall("g_value_get_string","number",["number"],[this.self]);if(str_ptr==0)return null;return vips_module.UTF8ToString(str_ptr);case"G_TYPE_ENUM":return vips_module.ccall("vips_enum_nick","string",["number","number"],[type,this.get()]);case"G_TYPE_FLAGS":return vips_module.ccall("vips_flags_nick","string",["number","number"],[type,this.get()]);case"G_TYPE_BOXED":const boxed_type=vips_module.GType[type];switch(boxed_type){case"VIPS_TYPE_REF_STRING":const size_ptr=vips_module._malloc(4);const str_ptr=vips_module.ccall("vips_ref_string_get","number",["number","number"],[this.self,size_ptr]);if(str_ptr==0)return null;const size=vips_module.getValue(size_ptr,"i32");vips_module._free(size_ptr);const str=vips_module.UTF8ToString(str_ptr,size);return str;case"VIPS_TYPE_ARRAY_INT":return this.getArray(vips_module.HEAP32,4);case"VIPS_TYPE_ARRAY_DOUBLE":return this.getArray(vips_module.HEAPF64,8);case"VIPS_TYPE_ARRAY_IMAGE":const result=[];const array_size=vips_module.ccall("vips_array_image_length","number",["number"],[this.self]);for(let i=0;i<array_size;i++){const image_ptr=vips_module.ccall("vips_array_image_get","number",["number","number"],[this.self,i]);result.push(new VipsImage(image_ptr))}return result;case"VIPS_TYPE_BLOB":const size_ptr=vips_module._malloc(4);const blob_ptr=vips_module.ccall("vips_blob_get","number",["number","number"],[this.self,size_ptr]);if(blob_ptr==0)return null;const size=vips_module.getValue(size_ptr,"i32");vips_module._free(size_ptr);const data=new Uint8Array(size);data.set(vips_module.HEAPU8.subarray(blob_ptr,blob_ptr+size));return data;default:throw new Error(`Unknown boxed type ${boxed_type} = ${type}`)}case"G_TYPE_POINTER":const ptr=vips_module.ccall("g_value_get_pointer","number",["number"],[this.self]);if(ptr==0)return null;const ptr_type=vips_module.GType[type];switch(ptr_type){case"VIPS_TYPE_IMAGE":return new VipsImage(ptr);default:throw new Error(`Unknown pointer type ${ptr_type} = ${type}`)}default:throw new Error(`Unknown fundamental type ${vips_module.GType[g_type_fundamental]} = ${g_type_fundamental}`)}}getArray(heap,size){const array_size=vips_module.ccall("vips_array_int_length","number",["number"],[this.self]);const ptr=vips_module.ccall("vips_array_int_get","number",["number"],[this.self]);const result=[];for(let i=0;i<array_size;i++)result.push(heap[ptr>>(size>>2)+i]);return result}set(value){const type=this.getType();const g_type_fundamental=vips_module.ccall("g_type_fundamental","number",["number"],[type]);switch(vips_module.GType[g_type_fundamental]){case"G_TYPE_BOOLEAN":vips_module.ccall("g_value_set_boolean",null,["number","boolean"],[this.self,value]);break;case"G_TYPE_INT":vips_module.ccall("g_value_set_int",null,["number","number"],[this.self,value]);break;case"G_TYPE_DOUBLE":vips_module.ccall("g_value_set_double",null,["number","number"],[this.self,value]);break;case"G_TYPE_STRING":const str_ptr=vips_module.stringToNewUTF8(value);vips_module.ccall("g_value_set_string",null,["number","number"],[this.self,str_ptr]);vips_module._free(str_ptr);break;case"G_TYPE_ENUM":if(typeof value==="string"){const int_value=vips_module.ccall("vips_enum_from_nick","number",["string","number","string"],["vips-node",type,value]);if(int_value<0)throw new Error(get_vips_error());value=int_value}this.set(value);break;case"G_TYPE_FLAGS":if(typeof value==="string"){const int_value=vips_module.ccall("vips_flags_from_nick","number",["string","number","string"],["vips-node",type,value]);if(int_value<0)throw new Error(get_vips_error());value=int_value}this.set(value);break;case"G_TYPE_BOXED":const boxed_type=vips_module.GType[type];switch(boxed_type){case"VIPS_TYPE_ARRAY_INT":this.setArray(value,"i32");break;case"VIPS_TYPE_ARRAY_DOUBLE":this.setArray(value,"double");break;case"VIPS_TYPE_BLOB":const blob=vips_module.ccall("vips_blob_new","number",["number","number"],[0,0]);vips_module.ccall("vips_blob_set",null,["number","number","array","number"],[this.self,0,value,value.length]);break;default:throw new Error(`Unknown boxed type ${boxed_type} = ${type}`)}break;default:throw new Error(`Unknown fundamental type ${vips_module.GType[g_type_fundamental]} = ${g_type_fundamental}`)}}setArray(value,type){const pointer=vips_module._malloc(value.length*vips_module.HEAP32.BYTES_PER_ELEMENT);vips_module.HEAP32.set(value,pointer>>2);vips_module.ccall("vips_array_int_set",null,["number","number","number"],[this.self,pointer,value.length])}getType(){return vips_module.getValue(this.self,"i32")}};vips_module.GType={};vips_module.ccall("vips_node_generate_g_type_enum",null,[],[]);if(vips_module.ccall("vips_init","number",["string"],["vips-wasm"])!=0)throw new Error(get_vips_error());console.log("vips-wasm initialized - version",vips_module.ccall("vips_version","string",["number"],[0]),vips_module.ccall("vips_version","string",["number"],[1]),vips_module.ccall("vips_version","string",["number"],[2]));const vips_cache_max_mem=vips_module.ccall("vips_cache_get_max_mem","number",[],[]);console.log("vips-wasm cache max mem =",vips_cache_max_mem);for(const name of["abs","add","affine","and","autorot","black","boolean","buildlut","canny","cast","cast_schar","cast_uchar","cast_ushort","cast_short","cast_uint","cast_int","cast_float","cast_double","cast_complex","cast_dcomplex","ceil","colourspace","complex","complex2","complexform","complexget","composite","composite2","conv","conva","convasep","convf","convi","convsep","copy","cos","countlines","crop","cross_phase","cunning","deform","deviate","divide","draw_circle","draw_flood","draw_image","draw_line","draw_mask","draw_rect","draw_smudge","e","embed","equal","equal_const","exp","exp10","extract_area","extract_band","eye","falsecolour","fastcor","fill_nearest","find_trim","flatten","flip","floor","freqmult","fwfft","gamma","gaussblur","gaussmat","gaussnoise","getpoint","grey","grid","hist_cum","hist_equal","hist_find","hist_find_indexed","hist_find_ndim","hist_ismonotonic","hist_local","hist_match","hist_norm","hist_plot","hough_circle","hough_line","icc_export","icc_import","icc_transform","identity","ifilter","ifthenelse","insert","invert","invfft","join","labelregions","lapey","less","less_const","linear","linecache","log","log10","logmat","mag","mapim","maplut","mask_butterworth","mask_butterworth_band","mask_butterworth_circle","mask_butterworth_ring","mask_fractal","mask_gaussian","mask_gaussian_band","mask_gaussian_circle","mask_gaussian_ring","mask_ideal","mask_ideal_band","mask_ideal_circle","mask_ideal_ring","match","math","math2","math2_const","max","max_const","measure","merge","min","min_const","more","more_const","morph","msb","multiply","nint","not","notequal","notequal_const","or","phase","pow","pow_const","premultiply","profile","project","rank","recomb","reduce","reduceh","reducev","remainder","remainder_const","replicate","rint","rot","rot45","rotate","round","scale","sequential","sharpen","sign","similarity","sin","sines","smartcrop","sobel","spcor","spectrum","sqrt","stats","stdif","subsample","subtract","sum","switch","system","tan","text","thumbnail","thumbnail_buffer","thumbnail_image","tilecache","transpose3d","unpremultiply","worley","wrap","xor","zoom","jpegload","jpegload_buffer","jpegsave","jpegsave_buffer","jpegsave_mime","magickload","magickload_buffer","pngload","pngload_buffer","pngsave","pngsave_buffer","webpload","webpload_buffer","webpsave","webpsave_buffer","webpsave_mime","tiffload","tiffload_buffer","tiffsave","tiffsave_buffer","heifload","heifload_buffer","heifsave","heifsave_buffer","pdfload","pdfload_buffer","svgload","svgload_buffer","gifload","gifload_buffer","jp2kload","jp2kload_buffer","jp2ksave","jp2ksave_buffer","bandbool","bandjoin","bandjoin_const","bandmean","bandrank","bandunfold"]){VipsImage.prototype[name]=function(...args){const op=VipsOperation.newFromName(name);op.set("in",this);let i=0;for(const arg of args)op.set(op.getNthOptionalInput(i++),arg);return op.call()}}return{Image:VipsImage,Operation:VipsOperation,init:init}}()}();
-
-// ============================================================================
-// FIN DEL CÓDIGO DE VIPS.JS
-// ============================================================================
-
-// ============================================================================
-// INICIO DE NUESTRO CÓDIGO DE APLICACIÓN
-// ============================================================================
-
-// --- CONFIGURACIÓN "COHETE" PARA CLOUDFLARE ---
-const MAX_IMAGE_WIDTH = 600;
-const WEBP_QUALITY = 5;
-
-// --- HEADERS "LLAVE MAESTRA" ---
-function getHeaders(domain) {
-  return {
-    'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36',
-    'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
-    'Referer': domain ? domain + '/' : 'https://www.google.com/',
-    'Connection': 'keep-alive',
-    'Upgrade-Insecure-Requests': '1'
-  };
-}
+// Este es el contenido para src/index.js (CÓDIGO DE DIAGNÓSTICO)
+import vips from './vips.js';
 
 export default {
   async fetch(request, env, ctx) {
-    // Necesitamos esta línea para que vips.js funcione.
-    globalThis.Uint8_Array = Uint8Array;
-    globalThis.vips = vips;
-
-    const url = new URL(request.url);
-    const imageUrl = url.searchParams.get('url');
-
-    if (!imageUrl) {
-      return new Response(JSON.stringify({ error: 'Falta el parámetro url' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
+    let checkpoint = 'Inicio';
     try {
-      const parsedUrl = new URL(imageUrl);
-      const domain = parsedUrl.origin;
+      // Checkpoint 1: Iniciar el Worker
+      checkpoint = 'Worker iniciado';
+      globalThis.Uint8_Array = Uint8Array;
       
-      const response = await fetch(imageUrl, { headers: getHeaders(domain) });
+      const url = new URL(request.url);
+      const imageUrl = url.searchParams.get('url');
 
+      if (!imageUrl) {
+        return new Response(JSON.stringify({ status: "FALLO", checkpoint: "Validación de URL", error: "Falta el parámetro url" }), { status: 400 });
+      }
+
+      // Checkpoint 2: Descargar la imagen
+      checkpoint = 'Descargando imagen original';
+      const response = await fetch(imageUrl);
       if (!response.ok) {
-        throw new Error(`Error al obtener la imagen: ${response.status}`);
-      }
-      
-      const originalContentType = response.headers.get('content-type');
-      if (!originalContentType || !originalContentType.startsWith('image/')) {
-        throw new Error('La URL no es una imagen válida.');
+        throw new Error(`Respuesta no exitosa del servidor de origen: ${response.status}`);
       }
 
+      // Checkpoint 3: Cargar el motor WASM
+      checkpoint = 'Inicializando motor WASM (vips.init)';
+      await vips.init(env.VIPS_WASM);
+      
+      // Checkpoint 4: Leer la imagen en el motor
+      checkpoint = 'Leyendo buffer de imagen con vips';
       const arrayBuffer = await response.arrayBuffer();
       const originalBuffer = new Uint8_Array(arrayBuffer);
-      const originalSize = originalBuffer.byteLength;
-      
-      // --- PIPELINE CON WASM-VIPS ---
-      await vips.init(env.VIPS_WASM);
       let image = vips.Image.newFromBuffer(originalBuffer);
-      
-      image = image.thumbnailImage(MAX_IMAGE_WIDTH, { height: 15000, noRotate: true });
 
-      const compressedBuffer = image.webpsave({ Q: WEBP_QUALITY, effort: 6 });
-      
+      // Checkpoint 5: Realizar una operación simple
+      checkpoint = 'Ejecutando operación de compresión (webpsave)';
+      const compressedBuffer = image.webpsave({ Q: 5 });
       image.delete();
-      
-      const compressedSize = compressedBuffer.byteLength;
 
-      if (compressedSize < originalSize) {
-        return sendCompressed(compressedBuffer, originalSize, compressedSize);
-      } else {
-        return sendOriginal(originalBuffer, originalContentType);
-      }
-      
+      // Si llegamos hasta aquí, todo funciona
+      return new Response(JSON.stringify({
+        status: "ÉXITO TOTAL",
+        checkpoint: "Todos los pasos completados",
+        message: "El sistema está listo para funcionar. Reemplaza este código de diagnóstico por el de producción."
+      }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+
     } catch (error) {
-      console.error("[FALLBACK ACTIVADO]", { url: imageUrl, errorMessage: error.message });
-      return new Response('Redireccionando a la fuente original por un error.', {
-        status: 302,
-        headers: { 'Location': imageUrl },
-      });
+      // Si algo falla, devolvemos exactamente dónde y por qué.
+      return new Response(JSON.stringify({
+        status: "FALLO",
+        checkpoint: `Error en el paso: '${checkpoint}'`,
+        error_message: error.message,
+        error_stack: error.stack,
+      }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
   },
 };
-
-// --- FUNCIONES HELPER PARA CLOUDFLARE ---
-function sendCompressed(buffer, originalSize, compressedSize) {
-  return new Response(buffer, {
-    headers: {
-      'Content-Type': 'image/webp',
-      'Cache-Control': 'public, max-age=31536000, stale-while-revalidate',
-      'X-Original-Size': originalSize,
-      'X-Compressed-Size': compressedSize,
-    },
-  });
-}
-
-function sendOriginal(buffer, contentType) {
-  return new Response(buffer, {
-    headers: {
-      'Content-Type': contentType,
-      'Cache-control': 'public, max-age=31536000, stale-while-revalidate',
-      'X-Original-Size': buffer.byteLength,
-      'X-Compressed-Size': buffer.byteLength,
-    },
-  });
-  }
