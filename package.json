@@ -1,8 +1,0 @@
-{
-  "name": "tachiyomi-sy-worker",
-  "version": "1.0.0",
-  "type": "module",
-  "dependencies": {
-    "itty-router": "^4.0.21"
-  }
-}
