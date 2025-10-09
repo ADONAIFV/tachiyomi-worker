@@ -43,10 +43,12 @@ export default {
             const originalBuffer = new Uint8Array(arrayBuffer);
             const originalSize = originalBuffer.byteLength;
             
-            // Cargar el módulo WASM desde la carpeta public
-            const wasmModule = await env.ASSETS.fetch(new URL('/vips.wasm', url.origin));
+            // --- LA CORRECCIÓN CLAVE: "ABRIR LA CAJA" ANTES DE USAR EL MOTOR ---
+            const wasmResponse = await env.ASSETS.fetch(new URL('/vips.wasm', url.origin));
+            const wasmModule = await wasmResponse.arrayBuffer(); // <-- Extraemos el contenido binario
             
-            await vips.init(wasmModule);
+            await vips.init(wasmModule); // <-- Ahora le pasamos el contenido correcto
+            
             let image = vips.Image.newFromBuffer(originalBuffer);
             
             image = image.thumbnailImage(MAX_IMAGE_WIDTH, { height: 15000, noRotate: true });
@@ -68,5 +70,24 @@ export default {
 };
 
 // --- FUNCIONES HELPER ---
-function sendCompressed(buffer, originalSize, compressedSize) { /* ... */ }
-function sendOriginal(buffer, contentType) { /* ... */ }
+function sendCompressed(buffer, originalSize, compressedSize) {
+    return new Response(buffer, {
+        headers: {
+            'Content-Type': 'image/webp',
+            'Cache-Control': 'public, max-age=31536000, stale-while-revalidate',
+            'X-Original-Size': originalSize,
+            'X-Compressed-Size': compressedSize,
+        },
+    });
+}
+
+function sendOriginal(buffer, contentType) {
+    return new Response(buffer, {
+        headers: {
+            'Content-Type': contentType,
+            'Cache-Control': 'public, max-age=31536000, stale-while-revalidate',
+            'X-Original-Size': buffer.byteLength,
+            'X-Compressed-Size': buffer.byteLength,
+        },
+    });
+            }
