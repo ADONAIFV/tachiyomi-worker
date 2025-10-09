@@ -1,0 +1,7 @@
+name = "tachiyomi-compressor"
+main = "src/index.js"
+compatibility_date = "2025-10-09"
+
+[[wasm_modules]]
+name = "VIPS_WASM"
+path = "src/vips.wasm"
