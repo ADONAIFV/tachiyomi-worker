@@ -1,11 +1,6 @@
-name = "tachiyomi-sy-worker"
+name = "bandwidth-hero"
 main = "src/index.js"
-compatibility_date = "2025-10-09"
+compatibility_date = "2023-12-01"
 
 [site]
 bucket = "./public"
-entry-point = "src"
-
-[vars]
-DEFAULT_QUALITY = "80"
-MAX_IMAGE_SIZE = "10000000"
