@@ -1,6 +1,0 @@
-name = "compressor-api"
-main = "src/index.js"
-compatibility_date = "2025-10-09"
-
-[[wasm_modules]]
-VIPS_WASM = "src/vips.wasm"
