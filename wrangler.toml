@@ -1,0 +1,11 @@
+name = "tachiyomi-sy-worker"
+main = "src/index.js"
+compatibility_date = "2025-10-09"
+
+[site]
+bucket = "./public"
+entry-point = "src"
+
+[vars]
+DEFAULT_QUALITY = "80"
+MAX_IMAGE_SIZE = "10000000"
