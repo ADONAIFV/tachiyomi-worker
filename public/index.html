@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TachiyomiSY Worker</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 20px; }
+    input, select, button { margin: 5px; padding: 5px; }
+    img { max-width: 90%; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>TachiyomiSY - Cloudflare Worker</h1>
+  <p>Optimiza imágenes directamente desde la nube ⚡</p>
+  
+  <input type="text" id="url" placeholder="URL de la imagen" size="40">
+  <select id="format">
+    <option value="webp">WebP</option>
+    <option value="jpeg">JPEG</option>
+    <option value="avif">AVIF</option>
+  </select>
+  <input type="number" id="quality" value="80" min="10" max="100">
+  <button onclick="optimize()">Optimizar</button>
+
+  <div id="result"></div>
+
+  <script>
+    async function optimize() {
+      const url = document.getElementById('url').value
+      const format = document.getElementById('format').value
+      const quality = document.getElementById('quality').value
+      const workerUrl = `/image?url=${encodeURIComponent(url)}&format=${format}&quality=${quality}`
+
+      const img = document.createElement('img')
+      img.src = workerUrl
+      document.getElementById('result').innerHTML = ''
+      document.getElementById('result').appendChild(img)
+    }
+  </script>
+</body>
+</html>
