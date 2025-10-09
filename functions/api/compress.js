@@ -1,4 +1,4 @@
-// Este es el contenido final para functions/api/compress.js
+// Este es el contenido final y limpio para functions/api/compress.js
 
 // --- HEADERS "LLAVE MAESTRA" ---
 function getHeaders(domain) {
@@ -6,7 +6,8 @@ function getHeaders(domain) {
     'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36',
     'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
     'Referer': domain ? domain + '/' : 'https://www.google.com/',
-    'Connection': 'keep-alive'
+    'Connection': 'keep-alive',
+    'Upgrade-Insecure-Requests': '1'
   };
 }
 
@@ -28,6 +29,7 @@ export async function onRequest(context) {
       headers: getHeaders(domain)
     });
     
+    // Opciones de compresión: 600px de ancho, formato WebP, CALIDAD 5
     const imageResponse = await fetch(imageRequest, {
       cf: {
         image: {
@@ -39,38 +41,17 @@ export async function onRequest(context) {
     });
 
     if (!imageResponse.ok) {
-        throw new Error(`Error al procesar la imagen: ${imageResponse.status}`);
+        throw new Error(`Error al obtener/procesar la imagen: ${imageResponse.status}`);
     }
 
-    // Devolvemos la imagen directamente, con los headers de tamaño para la UI
-    const finalHeaders = new Headers(imageResponse.headers);
-    finalHeaders.set('X-Original-Size', imageResponse.headers.get('cf-input-size') || 0);
-    finalHeaders.set('X-Compressed-Size', imageResponse.headers.get('content-length') || 0);
-    
-    return new Response(imageResponse.body, {
-        headers: finalHeaders,
-        status: imageResponse.status
-    });
+    // Devolvemos la imagen directamente. No necesitamos añadir headers de tamaño
+    // porque la nueva UI los calcula por su cuenta.
+    return imageResponse;
 
   } catch (error) {
     console.error("[FALLBACK ACTIVADO]", { errorMessage: error.message });
+    // Si algo falla, redireccionamos a la imagen original.
     const imageUrl = new URL(context.request.url).searchParams.get('url');
     return Response.redirect(imageUrl, 302);
   }
-}```
-
-#### Paso 3: Configurar Cloudflare (La Parte Fácil)
-
-1.  Ve a tu proyecto de "Pages" en Cloudflare.
-2.  Ve a **"Configuración"** -> **"Compilaciones e implementaciones"**.
-3.  Asegúrate de que el campo **"Crear directorio de salida"** esté **VACÍO**. Si pone `public`, bórralo.
-4.  Guarda los cambios y lanza una nueva implementación.
-
-### El Resultado Final y Definitivo
-
-*   `https://tachiyomi-worker.pages.dev/` -> Cargará tu `index.html`.
-*   La UI llamará a `.../api/compress?url=...`.
-*   Cloudflare ejecutará `functions/api/compress.js`.
-*   Tachiyomi usará `.../api/compress` y funcionará.
-
-Hemos eliminado el conflicto. Esta es la arquitectura correcta. De nuevo, te pido una disculpa por esta odisea. Este es el final del camino.
+}
