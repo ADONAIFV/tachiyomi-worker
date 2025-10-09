@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bandwidth Hero - Tester</title>
+    <title>Bandwidth Hero (Cloudflare Edition)</title>
     <style>
         :root { --bg: #121212; --text: #e0e0e0; --primary: #f38020; --card: #1e1e1e; --border: #333; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; display: flex; justify-content: center; padding: 2rem; }
@@ -54,8 +54,7 @@
         </div>
     </main>
 <script>
-    // La URL del servidor ahora es la raíz de la página actual.
-    document.getElementById('server-url').value = window.location.origin;
+    document.getElementById('server-url').value = `${window.location.origin}/api/compress`;
     const form = document.getElementById('compress-form');
     const urlInput = document.getElementById('url-input');
     const loader = document.getElementById('loader');
@@ -67,17 +66,25 @@
         resultsContainer.style.display = 'none';
 
         const imageUrl = urlInput.value;
-        const apiUrl = `${window.location.origin}/?url=${encodeURIComponent(imageUrl)}`;
+        const apiUrl = `/api/compress?url=${encodeURIComponent(imageUrl)}`;
         
         try {
-            // Imagen Original
+            // Mostramos la imagen original primero para dar feedback visual
             const originalRes = await fetch(imageUrl);
+            if (!originalRes.ok) throw new Error(`No se pudo cargar la imagen original: ${originalRes.status}`);
             const originalBlob = await originalRes.blob();
             document.getElementById('original-img').src = URL.createObjectURL(originalBlob);
             document.getElementById('original-stats').textContent = `Tamaño: ${formatBytes(originalBlob.size)}`;
 
-            // Imagen Comprimida
+            // Ahora pedimos la imagen comprimida a nuestra API
             const compressedRes = await fetch(apiUrl);
+            if (compressedRes.status === 302 || compressedRes.redirected) {
+                throw new Error("El servidor de origen bloqueó la petición. Se activó el fallback a la imagen original.");
+            }
+            if (!compressedRes.ok) {
+                throw new Error(`Error del servidor de compresión (${compressedRes.status})`);
+            }
+            
             const compressedBlob = await compressedRes.blob();
             document.getElementById('compressed-img').src = URL.createObjectURL(compressedBlob);
             const savings = 100 - (compressedBlob.size / originalBlob.size * 100);
@@ -100,4 +107,4 @@
     };
 </script>
 </body>
-                      </html>
+</html>
