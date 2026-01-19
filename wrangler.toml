@@ -1,0 +1,25 @@
+# TachiyomiSY - Cloudflare Workers Configuration
+
+name = "tachiyomi-sy"
+compatibility_date = "2026-01-15"
+
+# Variables de entorno
+[vars]
+ENVIRONMENT = "production"
+DEFAULT_QUALITY = "5"
+MAX_WIDTH = "600"
+COMPRESSION_MODE = "strict"
+
+# Configuración de assets estáticos (interfaz web)
+[[assets]]
+directory = "public"
+not_found_handling = "single-page-application"
+
+# Triggers (rutas)
+[triggers]
+crons = []
+
+# Build configuration
+[build]
+command = "npm install"
+watch_dir = "src"

@@ -1,0 +1,21 @@
+{
+  "name": "tachiyomi-sy",
+  "version": "1.0.0",
+  "description": "Compression service for manga reading with Tachiyomi - Cloudflare Workers version",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "npx wrangler dev",
+    "deploy": "npx wrangler deploy",
+    "build": "echo 'No build step required'"
+  },
+  "keywords": [
+    "tachiyomi",
+    "manga",
+    "compression",
+    "cloudflare-workers",
+    "image-optimization"
+  ],
+  "author": "ASTAROTH",
+  "license": "MIT"
+}
